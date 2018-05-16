@@ -1,0 +1,36 @@
+/*
+=====
+Header
+=====
+*/
+
+h1,
+form {
+  text-align: center;
+}
+
+form {
+  margin-bottom: 2.5%;
+}
+
+.form-input {
+  width: 50%;
+  display: inline-block;
+}
+
+.btn {
+  margin-bottom: 2.5px;
+}
+
+/*
+=====
+Content
+=====
+*/
+
+img {
+  height: 50vh;
+  margin-bottom: .8rem;
+  -o-object-fit: contain;
+  object-fit: contain;
+}
