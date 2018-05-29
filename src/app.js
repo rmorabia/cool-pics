@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
-import InfiniteScroll from 'react-infinite-scroller'
-
 import './style.css'
 
 const tumblr = require('tumblr.js')
@@ -23,10 +21,21 @@ class CoolPics extends Component {
       data: [],
       tag: 'tag',
       dataLoaded: false,
-      timestamp: 0
+      timestamp: 0,
+      loading: false, // might be the same as dataLoaded?
+      prevY: 0
     }
     this.updateTag = this.updateTag.bind(this)
-    this.infiniteScroll = this.infiniteScroll.bind(this)
+    this.handleObserver = this.handleObserver.bind(this)
+  }
+  componentDidMount () {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 1.0
+    }
+    this.observer = new IntersectionObserver(this.handleObserver.bind(this), options)
+    this.observer.observe(this.loading)
   }
   updateTag (e) {
     e.preventDefault()
@@ -48,21 +57,23 @@ class CoolPics extends Component {
       )
     })
   }
-  infiniteScroll () {
-    client.taggedPosts(this.state.tag, { limit: 12 }, (err, data) => {
+  handleObserver (entities, observer) {
+    const y = entities[0].boundingClientRect.y
+    if (this.state.prevY > y) {
+      console.log('amaze')
+      client.taggedPosts(this.state.tag, { limit: 12, before: this.state.timestamp }, (err, data) => {
       const imgArray = data.filter((i) => i.type === 'photo')
       const firstThreePhotos = imgArray.slice(0, 3)
       const images = firstThreePhotos.map((i) => i.photos[0])
-      console.log(firstThreePhotos[2].timestamp)
       this.setState(() => {
         return ({
           data: images,
-          dataLoaded: true,
           timestamp: firstThreePhotos[2].timestamp
-        })
-      }
-      )
+       })
+     })
     })
+     this.setState({ prevY: y })
+    }
   }
   render () {
     return (
@@ -79,7 +90,6 @@ class CoolPics extends Component {
                   <Picture
                     data={this.state.data[index]}
                     key={this.state.data + index}
-                    infiniteScroll={this.infiniteScroll}
                   />
                 )
               })}
@@ -87,6 +97,11 @@ class CoolPics extends Component {
           </div>
         )
         }
+        <div 
+          ref={loading => (this.loading = loading)}
+          style={{ height: '200px' }}
+        >fun fun
+        </div> 
       </div>
     )
   }
